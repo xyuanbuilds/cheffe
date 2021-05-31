@@ -1,0 +1,11 @@
+{
+  "name": "cheffe",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:xyuanbuilds/cheffe.git",
+  "author": "xyuanbuilds <1076849402@qq.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.3.2"
+  }
+}
