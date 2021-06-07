@@ -1,5 +1,14 @@
 {
   "cSpell.words": [
+    "Cgreen",
+    "Creset",
     "cheffe"
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": false,
+    "source.fixAll": true
+  },
+  "debug.javascript.unmapMissingSources": true,
 }

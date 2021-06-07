@@ -1,0 +1,31 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "name": "ts-node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**",
+        // "node_modules/**"
+      ],
+      "cwd": "${workspaceRoot}",
+      "env": { 
+        "DEBUG": "cheffe:yarn", 
+        "FORCE_COLOR": "true",
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.dev.json" 
+      }, // 环境变量
+      "internalConsoleOptions": "neverOpen",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      // "runtimeArgs": ["--loader", "ts-node/esm", "--experimental-modules"],
+      "args": ["${file}", "--transpile-only"],
+      // "args": ["${file}"],
+      "sourceMaps": true,
+      "console": "integratedTerminal"
+      // "stopOnEntry": false, // 启动后立即暂停
+    },
+  ],
+}

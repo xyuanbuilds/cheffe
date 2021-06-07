@@ -1,1 +1,5 @@
-const a = 1;
+import debugCreator from 'debug';
+
+const debug = debugCreator('cheffe');
+
+export { debug };
