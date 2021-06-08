@@ -1,14 +1,16 @@
 import * as chalk from 'chalk';
 import { spawn } from 'child_process';
-import { createDebugger } from '.';
+import { createDebugger, isWin } from '.';
 
 const yarnDebug = createDebugger('yarn');
 
 async function yarnInstall(cwd?: string) {
   const installDebug = yarnDebug.step('install');
+  const command = isWin ? 'cmd.exe' : 'yarn';
+  const args = isWin ? ['/c', 'yarn', 'install'] : ['install'];
 
   installDebug.start();
-  const installCmd = spawn('yarn', ['install'], {
+  const installCmd = spawn(command, args, {
     cwd,
     stdio: 'inherit',
   });
@@ -29,7 +31,9 @@ async function yarnStart(cwd?: string) {
   const startDebug = yarnDebug.step('start');
   startDebug.start();
   try {
-    spawn('yarn', ['start'], { cwd, stdio: 'inherit' });
+    const command = isWin ? 'cmd.exe' : 'yarn';
+    const args = isWin ? ['/c', 'yarn', 'start'] : ['start'];
+    spawn(command, args, { cwd, stdio: 'inherit' });
   } catch (err) {
     startDebug(`[error] %O`, err);
     startDebug.fail();
