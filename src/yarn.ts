@@ -1,10 +1,13 @@
 import * as chalk from 'chalk';
 import { spawn } from 'child_process';
-import { debug } from '.';
+import { createDebugger } from '.';
 
-const yarnDebug = debug.extend('yarn');
+const yarnDebug = createDebugger('yarn');
 
 async function yarnInstall(cwd?: string) {
+  const installDebug = yarnDebug.step('install');
+
+  installDebug.start();
   const installCmd = spawn('yarn', ['install'], {
     cwd,
     stdio: 'inherit',
@@ -12,41 +15,51 @@ async function yarnInstall(cwd?: string) {
 
   return new Promise((resolve, reject) => {
     installCmd.on('exit', function (code) {
-      yarnDebug(`yarn install exit with code: ${chalk.bold(code)}`);
+      installDebug(`yarn install exit with code: ${chalk.bold(code)}`);
       if (code !== 0) {
         reject(code);
       } else {
         resolve(code);
       }
+      installDebug.done();
     });
   });
 }
 async function yarnStart(cwd?: string) {
-  spawn('yarn', ['start'], { cwd, stdio: 'inherit' });
+  const startDebug = yarnDebug.step('start');
+  startDebug.start();
+  try {
+    spawn('yarn', ['start'], { cwd, stdio: 'inherit' });
+  } catch (err) {
+    startDebug(`[error] %O`, err);
+    startDebug.fail();
+    console.error(chalk.bgRed.white(err.message));
+    throw err;
+  }
 }
 
 export { yarnInstall, yarnStart };
 
-async function test() {
-  process.stdin.pipe(process.stdout);
-  const spawnObj = spawn('git', ['status'], {
-    shell: '/bin/zsh',
-  });
+// async function test() {
+//   process.stdin.pipe(process.stdout);
+//   const spawnObj = spawn('git', ['status'], {
+//     shell: '/bin/zsh',
+//   });
 
-  spawnObj.stdout.pipe(process.stdout);
-  spawnObj.stdout.on('data', function (chunk) {
-    console.log(chunk.toString());
-  });
-  // spawnObj.stderr.on('data', (data) => {
-  //   console.log(data);
-  // });
-  // spawnObj.on('close', function (code) {
-  //   console.log('close code : ' + code);
-  // });
-  // spawnObj.on('exit', (code, single) => {
-  //   console.log('exit code : ' + code);
-  //   console.log('exit single : ' + single);
-  // });
-}
+//   spawnObj.stdout.pipe(process.stdout);
+//   spawnObj.stdout.on('data', function (chunk) {
+//     console.log(chunk.toString());
+//   });
+//   // spawnObj.stderr.on('data', (data) => {
+//   //   console.log(data);
+//   // });
+//   // spawnObj.on('close', function (code) {
+//   //   console.log('close code : ' + code);
+//   // });
+//   // spawnObj.on('exit', (code, single) => {
+//   //   console.log('exit code : ' + code);
+//   //   console.log('exit single : ' + single);
+//   // });
+// }
 
 // test();

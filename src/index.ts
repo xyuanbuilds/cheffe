@@ -1,5 +1,3 @@
-import debugCreator from 'debug';
+import { createProcessDebugger } from './utils/debugger';
 
-const debug = debugCreator('cheffe');
-
-export { debug };
+export const createDebugger = createProcessDebugger;

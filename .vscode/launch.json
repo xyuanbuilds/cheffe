@@ -14,7 +14,7 @@
       ],
       "cwd": "${workspaceRoot}",
       "env": { 
-        "DEBUG": "cheffe:yarn", 
+        "DEBUG": "cheffe,cheffe:*", 
         "FORCE_COLOR": "true",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.dev.json" 
       }, // 环境变量

@@ -2,12 +2,12 @@ import simpleGit from 'simple-git';
 import * as chalk from 'chalk';
 import * as ora from 'ora';
 
-import { debug } from '.';
+import { createDebugger } from '.';
 import { yarnInstall, yarnStart } from './yarn';
 
 import type { SimpleGit, SimpleGitOptions } from 'simple-git';
 
-const gitDebug = debug.extend('git');
+const gitDebug = createDebugger('git');
 const spinner = ora({
   color: 'yellow',
 });
@@ -17,26 +17,12 @@ const options: Partial<SimpleGitOptions> = {
   binary: 'git',
   maxConcurrentProcesses: 6,
 };
-// when setting all options in a single object
 const git: SimpleGit = simpleGit(options);
-
-function delay(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 function logError(info: string) {
   console.error(chalk`${chalk.black.bgRed('Error')} ${info}`);
 }
 
-function logWithSpinner(spinInstance: ora.Ora, info: any) {
-  if (spinInstance) {
-    spinInstance.clear();
-    spinInstance.frame();
-  }
-  log(info);
-}
 function getlogWithSpinner(spinInstance: ora.Ora) {
   return function logWithSpinner(info: any) {
     if (spinInstance) {
@@ -47,126 +33,76 @@ function getlogWithSpinner(spinInstance: ora.Ora) {
   };
 }
 
-async function getPullLegacy(curPath: string = process.cwd()) {
-  try {
-    git.outputHandler((_, stdOut, stdErr, args) => {
-      gitDebug(chalk`{bold stage: git.${args[0]}}`);
-
-      stdErr.on('data', (d) => {
-        logWithSpinner(spinner, d.toString().trim());
-        spinner.text = `Received: ${d.length}b`;
-      });
-      stdOut.on('data', (d) => (spinner.text = `Received: ${d.length}b`));
-      stdOut.on('end', () => {
-        gitDebug(chalk`{bold stage: git.${args[0]} done}`);
-      });
-    });
-
-    spinner.start();
-    spinner.prefixText = 'git.cwd';
-
-    await git.cwd(curPath);
-    logWithSpinner(spinner, chalk`cur path: ${curPath}`);
-
-    spinner.prefixText = 'git pull...';
-    await git.pull();
-
-    await delay(5000);
-
-    spinner.prefixText = 'git.checkout';
-    await git.checkout('dev');
-    await git.pull();
-
-    await delay(5000);
-
-    spinner.stopAndPersist({
-      text: `done`,
-      prefixText: `${getPull.name}:`,
-    });
-    // const gitWithPath = git.cwd({ path });
-
-    // // gitDebug('shit : %O', offsets);
-    // const info = await gitWithPath
-    //   .outputHandler((_, stdout, stderr, args) => {
-    //     gitDebug('git pull start: %O', args);
-    //     gitSpin.start('git pulling...');
-    //     console.log(process.cwd());
-
-    //     // stdout.pipe(process.stdout);
-    //     // stderr.pipe(process.stderr);
-    //   })
-    //   .pull();
-
-    // // gitDebug('git pull result: %O', info);
-    // gitSpin.succeed('git pull success 😊');
-  } catch (err) {
-    // gitDebug('git pull failed: %O', err);
-    spinner.fail('git pull failed 😭');
-    console.error(err.message);
-  }
-}
-
 async function getCheckout(branch: string) {
+  const checkoutDebug = gitDebug.step('checkout');
+  // checkoutDebug.info(`git.checkout ${chalk.bold('start')}`);
+  checkoutDebug.start();
+  checkoutDebug(`try to checkout to ${chalk.bold.yellow(branch)}`);
+
   const spinnerCheckout = ora({
     color: 'yellow',
-  });
+  }).start(`checkout to branch ${chalk.yellow(branch)}...`);
 
   const checkLog = getlogWithSpinner(spinnerCheckout);
   try {
-    git.outputHandler((_, stdOut, stdErr, args) => {
-      gitDebug(chalk`{bold stage: git.${args[0]}}`);
-
+    git.outputHandler((_, stdOut, stdErr) => {
       stdErr.on('data', (d) => {
         checkLog(d.toString().trim());
       });
+      stdOut.on('data', (d) => {
+        checkoutDebug(`%s received %L bytes`, 'stdOut', d);
+        checkLog(d.toString().trim());
+      });
       stdOut.on('end', () => {
-        gitDebug(chalk`{bold stage: git.${args[0]} done}`);
+        checkoutDebug(`no more data`);
       });
     });
 
-    spinnerCheckout.start(`checkout to branch ${chalk.yellow(branch)}...`);
-    await git.checkout(branch);
+    const result = await git.checkout(branch);
+    checkoutDebug.step('result')('%O', result);
     spinnerCheckout.succeed('git checkout success 😊');
+    checkoutDebug.done();
   } catch (err) {
     spinnerCheckout.fail('git checkout failed 😭');
-
-    console.error(err.message);
+    checkoutDebug(`[error] %O`, err);
+    checkoutDebug.fail();
+    console.error(chalk.red(err.message));
     throw err;
   }
 }
 async function getPull() {
+  const pullDebug = gitDebug.step('pull');
+  pullDebug.start();
+
+  // TODO 获取 remote 信息
+  pullDebug(`try to pull`);
   const spinnerPull = ora({
     color: 'yellow',
-  });
+  }).start(`pulling...`);
 
   const pullLog = getlogWithSpinner(spinnerPull);
   try {
-    git.outputHandler((_, stdOut, stdErr, args) => {
-      gitDebug(chalk`{bold stage: git.${args[0]}}`);
-
+    git.outputHandler((_, stdOut, stdErr) => {
       stdOut.on('data', (d) => {
+        pullDebug(`%s received %L bytes`, 'stdOut', d);
         pullLog(d.toString().trim());
       });
-      stdOut.on('end', () => {
-        gitDebug(chalk`{bold stage: git.${args[0]} out end}`);
-      });
-      stdOut.on('close', () => {
-        gitDebug(chalk`{bold stage: git.${args[0]} close}`);
-      });
-
       stdErr.on('data', (d) => {
         pullLog(d.toString().trim());
       });
+      stdOut.on('end', () => {
+        pullDebug(`no more data`);
+      });
     });
-
-    spinnerPull.start(`pulling...`);
-    // const rawData = await git.raw('pull');
-    await git.pull();
-    // pullLog(rawData);
+    const result = await git.pull();
+    pullDebug.step('result')('%O', result);
     spinnerPull.succeed('git pull success 😊');
+    pullDebug.done();
   } catch (err) {
     spinnerPull.fail('git pull failed 😭');
-    console.error(err.message);
+    pullDebug(`[error] %O`, err);
+    pullDebug.fail();
+    console.error(chalk.red(err.message));
     throw err;
   }
 }
@@ -193,7 +129,7 @@ async function gitCheckoutThenInstall(
     await yarnInstall(curPath);
     await yarnStart(curPath);
   } catch (err) {
-    gitDebug('checkout then install failed: %O', err.message);
+    gitDebug.info('checkout then install failed: %O', err);
     spinner.fail('checkout then install failed 😭');
     log(err);
   }
@@ -211,7 +147,6 @@ async function gitPrettyLog() {
 export { gitPrettyLog, gitCheckoutThenInstall };
 
 async function test() {
-  // const r = await git.listConfig();
   gitCheckoutThenInstall(
     'release-4.8.0-1',
     '/Users/xuyuan/datatom/danastudio/web'
