@@ -70,11 +70,40 @@ async function getCheckout(branch: string) {
     throw err;
   }
 }
+
+async function getRemoteOrigin() {
+  const remoteDebug = gitDebug.step('remote');
+  remoteDebug.start();
+  git.outputHandler((_, stdOut, stdErr) => {
+    stdOut.on('data', (d) => {
+      remoteDebug(`%s received %L bytes`, 'stdOut', d);
+    });
+    stdErr.on('data', (d) => {
+      remoteDebug(d.toString().trim());
+    });
+    stdOut.on('end', () => {
+      remoteDebug(`no more data`);
+    });
+  });
+
+  const info = await git.remote(['show', 'origin']);
+
+  const lines = info ? info.split('\n') : [];
+  const address =
+    lines.length > 1 && lines[1].includes('Fetch URL')
+      ? lines[1].replace(/Fetch URL:/, '').trim()
+      : '';
+  log(chalk.green`${chalk.bgGreen.black('From')} ${address}`);
+  remoteDebug.done();
+
+  return address;
+}
+
 async function getPull() {
   const pullDebug = gitDebug.step('pull');
   pullDebug.start();
 
-  // TODO 获取 remote 信息
+  await getRemoteOrigin();
   pullDebug(`try to pull`);
   const spinnerPull = ora({
     color: 'yellow',
