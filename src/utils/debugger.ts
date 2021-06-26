@@ -16,9 +16,9 @@ export interface CheffeDebugger extends Debugger {
   info: DebuggerWithPrefixHandler;
   /** 获取阶段 debugger */
   step(nextStep?: string): CheffeDebugger;
-  start(...args: any[]): void;
+  start(process: string, ...args: any[]): void;
   done(...args: any[]): void;
-  fail(...args: any[]): void;
+  fail(reason: unknown, ...args: any[]): void;
 }
 
 function getPrefixedDebugger(
@@ -36,9 +36,8 @@ function getPrefixedDebugger(
 /**
  * 生产每个主流程的 debugger
  * @example
- * ``` ts
- *  const gitDebugger = createProcessDebugger('git')
- * ```
+ * const gitDebugger = createProcessDebugger('git')
+ *
  * @param label 当前主流程名称
  * @param initialStep? 初始步骤名称
  * @param rootDebugger? 与库同名的debugger
@@ -79,9 +78,15 @@ export function createProcessDebugger(
     return Object.assign(prefixedDebugger, {
       info,
       label,
-      start: (...args: any[]) => info(chalk.bold('start'), ...args),
+      start: (process: string, ...args: any[]) => {
+        prefixedDebugger(`try to ${process}`);
+        info(chalk.bold('start'), ...args);
+      },
       done: (...args: any[]) => info(chalk.bold('done'), ...args),
-      fail: (...args: any[]) => info(chalk.bold('failed'), ...args),
+      fail: (reason: unknown, ...args: any[]) => {
+        prefixedDebugger(`[error] %O`, reason);
+        info(chalk.bold('failed'), ...args);
+      },
       step,
     });
   }

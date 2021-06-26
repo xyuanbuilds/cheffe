@@ -14,10 +14,11 @@
       ],
       "cwd": "${workspaceRoot}",
       "env": { 
-        "DEBUG": "cheffe,cheffe:*", 
+        // "DEBUG": "cheffe,cheffe:*", 
+        // "DEBUG": "cheffe:git:pull:result", 
         "FORCE_COLOR": "true",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.dev.json" 
-      }, // 环境变量
+      },
       "internalConsoleOptions": "neverOpen",
       "runtimeArgs": ["-r", "ts-node/register"],
       // "runtimeArgs": ["--loader", "ts-node/esm", "--experimental-modules"],
