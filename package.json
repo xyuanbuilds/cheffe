@@ -33,6 +33,8 @@
   },
   "dependencies": {
     "chalk": "^4.1.1",
+    "fp-ts": "^2.10.5",
+    "fp-ts-contrib": "^0.1.26",
     "ora": "^5.4.0",
     "simple-git": "^2.39.0",
     "yargs": "^17.0.1"
