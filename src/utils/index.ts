@@ -1,6 +1,9 @@
+import { type } from 'os';
 import * as chalk from 'chalk';
 import * as ora from 'ora';
 import createMaterials from './createMaterials';
+
+export const isWin = type() === 'Windows_NT';
 
 export const logError = (info: string) => {
   console.error(chalk`${chalk.black.bgRed('Error')} ${info}`);
