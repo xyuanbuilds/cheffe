@@ -30,7 +30,7 @@ const gitRemote: GitRemote =
           .remote(['-v']);
 
         log(
-          `${chalk.bgGreen.black('Remote')}: ${chalk.bold(
+          `${chalk.bgGreen.black('Remote')} ${chalk.bold(
             _getCurRemoteURL(remoteInfo, remote)
           )}`
         );
@@ -66,3 +66,49 @@ function _getCurRemoteURL(info: string | void, remote: string) {
     return nil;
   }
 }
+
+// legacy
+// function getRemoteOrigin(params: { git?: SimpleGit; cwd?: string } = {}) {
+//   const { cwd, git = defaultGit } = params;
+
+//   const CUR_PROCESS = 'remote';
+//   const remoteDebug = gitDebug.step(CUR_PROCESS);
+
+//   return tryCatch(
+//     async () => {
+//       remoteDebug.start();
+//       if (cwd) await git.cwd({ path: cwd });
+//       git.outputHandler((_, stdOut, stdErr) => {
+//         stdOut.on('data', (d) => {
+//           remoteDebug(`%s received %L bytes`, 'stdOut', d);
+//         });
+//         stdErr.on('data', (d) => {
+//           remoteDebug(d.toString().trim());
+//         });
+//         stdOut.on('end', () => {
+//           remoteDebug(`no more data`);
+//         });
+//       });
+//       const info = await git.remote(['show', 'origin']);
+
+//       const lines = info ? info.split('\n') : [];
+//       const address =
+//         lines.length > 1 && lines[1].includes('Fetch URL')
+//           ? lines[1].replace(/Fetch URL:/, '').trim()
+//           : '';
+//       log(chalk.green`${chalk.bgGreen.black('From')} ${address}`);
+//       remoteDebug.done();
+
+//       return {
+//         label: LABEL,
+//         process: CUR_PROCESS,
+//         address,
+//       } as const;
+//     },
+//     (reason) => {
+//       remoteDebug(`[error] %O`, reason);
+//       remoteDebug.fail();
+//       return new Error(String(reason));
+//     }
+//   );
+// }

@@ -39,12 +39,12 @@ const gitPull: GitPull =
 
     return tryCatch(
       async function runPull() {
-        pullDebug.start('pull');
-        spinner.start('pulling...');
-
         if (showRemote) {
           await gitRemote(remote)(dependencies)();
         }
+
+        pullDebug.start('pull');
+        spinner.start('pulling...');
         const result = await git
           .cwd({ path: cwd, root: false })
           .pull(remote, branch, {});
@@ -92,8 +92,8 @@ function _logInfo(
 
   files
     .map((fileName) => {
-      const insertNum = insertions[fileName];
-      const deleteNum = deletions[fileName];
+      const insertNum = insertions[fileName] || 0;
+      const deleteNum = deletions[fileName] || 0;
       const changeds = insertNum + deleteNum;
       const changedStr = String(changeds);
 
