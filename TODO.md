@@ -1,0 +1,2 @@
+- internation cli
+- use ts doc to make cli help

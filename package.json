@@ -16,7 +16,7 @@
     "typings/"
   ],
   "scripts": {
-    "clean": "git clean -fxd -e .idea -e node_modules",
+    "clean": "git clean -fxd -e .vscode -e node_modules -e TODO.md",
     "tsc": "tsc",
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "yarn clean && yarn build",

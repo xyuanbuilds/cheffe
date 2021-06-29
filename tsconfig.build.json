@@ -5,10 +5,11 @@
     "module": "commonjs",
     "composite": false,
     "noEmit": false,
+    "sourceMap": true,
   },
   "exclude": [
     "node_modules",
-    "test"
+    "**/*/test.ts"
   ],
   "include": [
     "src/**/*.ts",
