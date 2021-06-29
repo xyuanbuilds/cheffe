@@ -26,7 +26,8 @@
     "noEmit": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "temp"
   ],
   "include": [
     "src/**/*.ts",
