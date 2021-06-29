@@ -104,3 +104,6 @@ dist
 src/**/*.js
 src/**/*.map
 src/**/*.d.ts
+
+test.ts*
+test.js*
